@@ -47,9 +47,11 @@ def addEntity(en):
     if(en.author==None):
         return
 
-    article = Node("Article", title=en.title)
+    article = Node("Article", title=en.title,url=en.url,ee=en.ee,key=en.key)
     author = Node("author", name=en.author)
     journal = Node("journal", name=en.journal)
+
+
     modify = Relationship(author, "modify", article)
     modify['mdate'] = str(en.mdate)
     published_in = Relationship(article, "published_in", journal)
@@ -69,7 +71,7 @@ def addEntity(en):
 # In[13]:
 
 while (True):
-    some_entity = session.query(Dblp_class).filter(Dblp_class.columns.transformed == 0).limit(20).all()
+    some_entity = session.query(Dblp_class).filter(Dblp_class.columns.transformed == 1).limit(1).all()
     if (len(some_entity) == 0):
         logging.debug("Done")
         break
