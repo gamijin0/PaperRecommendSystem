@@ -8,7 +8,7 @@ logging.basicConfig(filename="exception.log", level=logging.DEBUG)
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine("mysql+pymysql://root:xlsd1996@chaos.ac.cn:3306/DBLP", echo=True)
+engine = create_engine("mysql+pymysql://root:xlsd1996@chaos.ac.cn:3306/DBLP", echo=False)
 # engine=create_engine("sqlite:///dblp.db",echo=True)
 
 Base = declarative_base()
@@ -43,7 +43,10 @@ dblp_graph = Graph(
 
 
 def addEntity(en):
-    print("Add:[ %s ]" % en.title[:20])
+
+    if(en.author==None):
+        return
+
     article = Node("Article", title=en.title)
     author = Node("author", name=en.author)
     journal = Node("journal", name=en.journal)
@@ -60,6 +63,8 @@ def addEntity(en):
     dblp_graph.merge(modify)
     dblp_graph.merge(published_in)
 
+    print("Add:[ %s ]" % en.title[:20])
+
 
 # In[13]:
 
@@ -73,8 +78,8 @@ while (True):
             addEntity(en)
             session.execute("update dblp set transformed=1 WHERE dblp.key = '%s';" % (en.key))
             session.commit()
-        except Exception() as e:
-
+        except Exception as e:
+            print(e)
             logging.debug(str(e))
 
 # match (j:journal),((a:Article)-[:published_in]->(j)),((h:author)-[:modify]->(a)) return collect(a)[..20] as A,collect(h)[..20] as H,j
