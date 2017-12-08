@@ -3,7 +3,7 @@
 # In[8]:
 import logging
 
-logging.basicConfig(filename="exception.log", level=logging.DEBUG)
+logging.basicConfig(filename="exception.log", level=logging.ERROR)
 
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
@@ -73,7 +73,7 @@ def addEntity(en):
 while (True):
     some_entity = session.query(Dblp_class).filter(Dblp_class.columns.transformed == 1).limit(1).all()
     if (len(some_entity) == 0):
-        logging.debug("Done")
+        logging.error("Done.")
         break
     for i, en in enumerate(some_entity):
         try:
@@ -82,6 +82,6 @@ while (True):
             session.commit()
         except Exception as e:
             print(e)
-            logging.debug(str(e))
+            logging.error(str(e))
 
 # match (j:journal),((a:Article)-[:published_in]->(j)),((h:author)-[:modify]->(a)) return collect(a)[..20] as A,collect(h)[..20] as H,j
