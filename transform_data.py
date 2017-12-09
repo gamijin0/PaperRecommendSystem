@@ -2,13 +2,25 @@
 
 # In[8]:
 import logging
-
-logging.basicConfig(filename="exception.log", level=logging.ERROR)
-
+import configparser
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine("mysql+pymysql://root:xlsd1996@chaos.ac.cn:3306/DBLP", echo=False)
+config = configparser.ConfigParser()
+config.read("config.cfg")
+
+m_username = config.get("mysql", "username")
+m_address = config.get("mysql", "address")
+m_port = config.get("mysql", "port")
+m_password = config.get("mysql", "password")
+
+n_username = config.get("neo4j", "username")
+n_address = config.get("neo4j", "address")
+n_port = config.get("neo4j", "port")
+n_password = config.get("neo4j", "password")
+
+logging.basicConfig(filename="exception.log", level=logging.ERROR)
+engine = create_engine("mysql+pymysql://%s:%s@%s:%s/DBLP" % (m_username, m_password, m_address, m_port), echo=False)
 # engine=create_engine("sqlite:///dblp.db",echo=True)
 
 Base = declarative_base()
@@ -36,14 +48,14 @@ print(total_num)
 from py2neo import Graph, Node, Relationship
 
 dblp_graph = Graph(
-    "http://chaos.ac.cn:7474",
-    username="neo4j",
-    password="xlsd1996"
+    "%s:%s" % (n_address, n_port),
+    username=n_username,
+    password=n_password
 )
 
 
-def addEntity(en):
-    if (en.author == None):
+def add_entity(en):
+    if not en.author:
         return
 
     article = Node("Article", title=en.title, url=en.url, ee=en.ee, key=en.key)
@@ -77,15 +89,15 @@ while (True):
         break
     for i, en in enumerate(some_entity):
         try:
-            addEntity(en)
+            add_entity(en)
             session.execute("update dblp set transformed=%d WHERE dblp.key = '%s';" % (TRANSFORMED_TAG, en.key))
             session.commit()
         except Exception as e:
             print(e)
             logging.error(str(e))
 
-# match (j:journal),((a:Article)-[:published_in]->(j)),((h:author)-[:modify]->(a)) return collect(a)[..20] as A,collect(h)[..20] as H,j
-# match (author:author)-[m]->(article)-[p]->(journal:journal)
-# with author,count(distinct journal) as cnt
-# where cnt > 1
-# return * limit 20
+            # match (j:journal),((a:Article)-[:published_in]->(j)),((h:author)-[:modify]->(a)) return collect(a)[..20] as A,collect(h)[..20] as H,j
+            # match (author:author)-[m]->(article)-[p]->(journal:journal)
+            # with author,count(distinct journal) as cnt
+            # where cnt > 1
+            # return * limit 20
