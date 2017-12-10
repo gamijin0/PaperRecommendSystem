@@ -81,9 +81,9 @@ def add_entity(en):
 # In[13]:
 
 TRANSFORMED_TAG = 2
-
+BATCH_SIZE  = int(config.get("transform","mysql_batch_size"))
 while (True):
-    some_entity = session.query(Dblp_class).filter(Dblp_class.columns.transformed != TRANSFORMED_TAG).limit(1).all()
+    some_entity = session.query(Dblp_class).filter(Dblp_class.columns.transformed != TRANSFORMED_TAG).limit(BATCH_SIZE).all()
     if (len(some_entity) == 0):
         logging.error("Done.")
         break
