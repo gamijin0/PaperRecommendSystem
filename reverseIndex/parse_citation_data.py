@@ -87,6 +87,7 @@ def mydump():
 
 def myload():
     import os
+    global reversedIndex
     if(os.path.exists(REVERSED_INDEX_FILE)):
         with open(REVERSED_INDEX_FILE,'rb') as f:
             reversedIndex = pickle.load(f)
@@ -115,11 +116,12 @@ if(__name__=="__main__"):
             if(len(line.strip())==0):
                 process_block_add_entity(block_content)
                 block_content.clear()
-                if (i % 1000 == 0):
-                    with open(LAST_LINE_FILE, 'w') as outfile:
-                        outfile.write(str(i))
-                    mydump()
+                #if (i % 10000 == 0):
+                #    with open(LAST_LINE_FILE, 'w') as outfile:
+                #        outfile.write(str(i))
+                #    mydump()
             else:
                 block_content.append(line)
 
-
+    mydump()
+    print("Done.")
