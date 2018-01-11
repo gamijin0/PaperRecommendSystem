@@ -124,5 +124,5 @@ if (__name__ == "__main__"):
         print("Miss percent: %f" % (missed / testSize))
         break
 
-    refs = session_local.query(Reference_sql_local).
+    refs = session_local.query(Reference_sql_local)
 
