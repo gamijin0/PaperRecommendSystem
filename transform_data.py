@@ -69,11 +69,11 @@ def add_entity(en):
     published_in['pages'] = en.pages
     published_in['volume'] = en.volume
 
-    dblp_graph.merge(article)
-    dblp_graph.merge(author)
-    dblp_graph.merge(journal)
-    dblp_graph.merge(modify)
-    dblp_graph.merge(published_in)
+    dblp_graph.create(article)
+    dblp_graph.create(author)
+    dblp_graph.create(journal)
+    dblp_graph.create(modify)
+    dblp_graph.create(published_in)
 
     print("Add:[ %s ]" % en.title[:20])
 
@@ -90,12 +90,11 @@ while (True):
     for i, en in enumerate(some_entity):
         try:
             add_entity(en)
-            session.execute("update dblp set transformed=%d WHERE dblp.key = '%s';" % (TRANSFORMED_TAG, en.key))
-            session.commit()
         except Exception as e:
             print(e)
             logging.error(str(e))
-
+        session.execute("update dblp set transformed=%d WHERE dblp.key = '%s';" % (TRANSFORMED_TAG, en.key))
+        session.commit()
             # match (j:journal),((a:Article)-[:published_in]->(j)),((h:author)-[:modify]->(a)) return collect(a)[..20] as A,collect(h)[..20] as H,j
             # match (author:author)-[m]->(article)-[p]->(journal:journal)
             # with author,count(distinct journal) as cnt

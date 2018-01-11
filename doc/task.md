@@ -24,11 +24,14 @@
 
 - [ ] 提取reference
     + 如何获取: 爬虫爬取
-        + <del>使用Article.ee<del>
-        + 使用 google scholar
+        + <del>使用Article.ee</del>
+        + <del>使用 google scholar
              + 需要使用代理,requests.session参考[此处](https://doomzhou.github.io/coder/2015/03/09/Python-Requests-socks-proxy.html)
              + 无对外api,故使用 [scholarly](https://pypi.python.org/pypi/scholarly) 来避免手动解析
-             + 可能遇到anti-robot问题(暂时未遇到)
+             + 遇到anti-robot问题
+             </del>
+        + 使用[DBLP + Citations](https://www.aminer.cn/dblp_citation)
+             + 其中article使用id表示,需要加入数据库
     + 如何保存这种关系: 非关系型数据库(neo4j)
 
 - [ ] 目标功能 :知识图谱的构建
