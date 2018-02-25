@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
+import sys
+sys.path.append("..")
 from db_session import session,Venue
 
 

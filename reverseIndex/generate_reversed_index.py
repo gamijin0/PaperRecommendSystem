@@ -2,6 +2,8 @@
 import logging
 import re
 import pickle
+import sys
+sys.path.append("..")
 from db_session import Article as db_Article,session
 
 import configparser

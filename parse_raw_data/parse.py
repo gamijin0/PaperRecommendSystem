@@ -6,8 +6,9 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.ext.declarative import declarative_base
 import os
 import time
-
-from ..db_session import session,Base,engine
+import sys
+sys.path.append("..")
+from db_session import session,Base,engine
 
 
 class Reference(Base):

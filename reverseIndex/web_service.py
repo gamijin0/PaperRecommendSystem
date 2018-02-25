@@ -1,6 +1,8 @@
 from flask import Flask,request,jsonify,render_template
 import pickle
 import configparser
+import sys
+sys.path.append("..")
 from db_session import session,Article
 app = Flask(__name__)
 
