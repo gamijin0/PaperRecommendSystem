@@ -2,6 +2,7 @@
 import logging
 import re
 import pickle
+from db_session import Article as db_Article,session
 
 import configparser
 
@@ -31,7 +32,7 @@ def addToHash(mystring,id):
         if(word in reversedIndex):
             reversedIndex[word].add(id)
         else:
-            new_set = set()
+            new_set = set() #use set to avoid the repeat id
             new_set.add(id)
             reversedIndex[word] = new_set
 
@@ -41,9 +42,10 @@ class Article:
     author = ""
     year = ""
     journal = ""
+    abstract = ""
 
     def addToReversedIndex(self):
-        for property in [self.title,self.author,self.journal]:
+        for property in [self.title,self.author,self.journal,self.abstract]:
             addToHash(property,self.id)
 
 
@@ -74,8 +76,14 @@ def process_block_add_entity(block_content):
             a.id = line[6:]
         if (line[1] == "c"):
             a.journal = line[2:]
+        if(line[1]=="!"):
+            a.abstract = line[2:]
 
+    # if(len(a.abstract)>0):
+    #     session.query(db_Article).filter(db_Article.id==a.id).update({db_Article.abstract:a.abstract})
+    #     session.commit()
     a.addToReversedIndex()
+
     print("[ %s ] added."%(a.id))
 
 
@@ -116,7 +124,7 @@ if(__name__=="__main__"):
             if(len(line.strip())==0):
                 process_block_add_entity(block_content)
                 block_content.clear()
-                #if (i % 10000 == 0):
+                # if (i % 10000 == 0):
                 #    with open(LAST_LINE_FILE, 'w') as outfile:
                 #        outfile.write(str(i))
                 #    mydump()
