@@ -7,7 +7,7 @@ from db_session import Article as db_Article,session
 import configparser
 
 config = configparser.ConfigParser()
-config.read("config.cfg")
+config.read("../config.cfg")
 
 Exception_log = config["log"]["exception_log"]
 

@@ -7,21 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 import time
 
-logging.basicConfig(filename="exception.log", level=logging.ERROR)
-# engine = create_engine("mysql+pymysql://%s:%s@%s:%s/DBLP" % (m_username, m_password, m_address, m_port), echo=False)
-engine=create_engine("sqlite:///dblp.db",echo=False)
-
-
-metadata = MetaData(engine)
-
-Base = declarative_base()
-
-from sqlalchemy.orm import sessionmaker
-
-Session = sessionmaker()
-Session.configure(bind=engine)
-session = Session()
-
+from ..db_session import session,Base,engine
 
 
 class Reference(Base):
