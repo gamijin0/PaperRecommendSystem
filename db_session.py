@@ -10,7 +10,7 @@ import time
 logging.basicConfig(filename="exception.log", level=logging.ERROR)
 # engine = create_engine("mysql+pymysql://%s:%s@%s:%s/DBLP" % (m_username, m_password, m_address, m_port), echo=False)
 config  = configparser.ConfigParser()
-config.read("config.cfg")
+config.read("C:\\Users\\49738\\Documents\\Learning\\PaperRecommendSystem\\config.cfg")
 DB_FILE = config["data"]["db_file"]
 engine=create_engine("sqlite:///%s" % DB_FILE,echo=False)
 
@@ -42,6 +42,14 @@ class Article(Base):
     year = Column(Integer)
     venue = Column(String)
 
+class Venue(Base):
+    __tablename__="venue"
+    name = Column(String(100),primary_key=True)
+    abb = Column(String(20))
+    publishing_house = Column(String(50))
+    url = Column(String(200))
+    big_rank = Column(String(5))
+    small_rank = Column(Integer)
 
 
 Base.metadata.create_all(engine)
