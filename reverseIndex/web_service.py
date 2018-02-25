@@ -27,7 +27,7 @@ def get_details(id):
         return ""
     else:
         one = res[0]
-        return one.title
+        return {'title':one.title,"abstract":one.abstract,'venue':one.venue,'author':one.author}
 
 @app.route('/query',methods=["GET","POST"])
 def query_word_list():
@@ -45,7 +45,7 @@ def query_word_list():
 
         return jsonify(
             {"result":[
-            {'id':id,"title":get_details(id)} for id in res
+            {'id':id,"details":get_details(id)} for id in res
         ]}
         )
     else:
