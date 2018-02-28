@@ -5,11 +5,11 @@ import pickle
 import sys
 sys.path.append("..")
 from db_session import Article as db_Article,session
-
+import os
 import configparser
 
 config = configparser.ConfigParser()
-config.read("../config.cfg")
+config.read(os.path.join(os.path.dirname(__file__),"../config.cfg"))
 
 Exception_log = config["log"]["exception_log"]
 

@@ -1,13 +1,12 @@
 from flask import Flask,request,jsonify,render_template
 import pickle
 import configparser
-import sys
-sys.path.append("..")
+import os
 from db_session import session,Article
 app = Flask(__name__)
 
 config = configparser.ConfigParser()
-config.read("config.cfg")
+config.read(os.path.join(os.path.dirname(__file__),"config.cfg"))
 REVERSED_INDEX_FILE = config["data"]["reversed_index_file"]
 
 reversedIndex = dict()
