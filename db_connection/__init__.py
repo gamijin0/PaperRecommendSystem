@@ -4,9 +4,16 @@ from .neo_connection import *
 
 
 def add_entity_to_neo(en):
-    new_article = Article()
+
+    new_article = Article.select(dblp_graph).where(article_id=en.id).first()
+
+    if(not new_article):
+        new_article = Article()
+    else:
+        print(new_article)
+
     new_article.title = en.title
-    new_article.id = en.id
+    new_article.article_id = en.id
     new_article.abstract = en.abstract
     new_article.year = en.year
 
@@ -22,7 +29,7 @@ def add_entity_to_neo(en):
 
     for ca_id in en.citation:
         ca = Article()
-        ca.id = ca_id
+        ca.article_id = ca_id
         new_article.cite.add(ca)
 
     dblp_graph.push(new_article)
@@ -33,7 +40,7 @@ def add_entity_to_neo(en):
 
 
 def query_detail_by_id(id):
-    a = Article.select(dblp_graph).where(id=id).first()
+    a = Article.select(dblp_graph).where(article_id=id).first()
 
 
 

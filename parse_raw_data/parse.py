@@ -41,7 +41,7 @@ def process_block_add_entity(block_content):
         if (line[1] == "t"):
             a.year = int(line[2:])
         if (line[1] == "i"):
-            a.id = line[6:]
+            a.id = int(line[6:])
         if (line[1] == "c"):
             a.venue = line[2:]
         if(line[1]=='!'):

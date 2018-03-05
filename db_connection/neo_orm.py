@@ -1,8 +1,8 @@
 from py2neo.ogm import GraphObject, Property, RelatedTo, RelatedFrom
 
 class Article(GraphObject):
-    __primarykey__ = "id"
-    id = Property()
+    __primarykey__ = "article_id"
+    article_id = Property()
     title = Property()
     year = Property()
     abstract  = Property()
