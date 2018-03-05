@@ -50,7 +50,7 @@ def process_block_add_entity(block_content):
         if (line[1] == "*"):
             a.title = line[2:]
         if (line[1] == "@"):
-            a.author = line[2:]
+            authors = line[2:]
         if (line[1] == "t"):
             a.year = int(line[2:])
         if (line[1] == "i"):

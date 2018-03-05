@@ -18,12 +18,7 @@ n_port = config.get("neo4j", "port")
 n_password = config.get("neo4j", "password")
 
 
-from py2neo import Graph, Node, Relationship
-graph = Graph(
-    "%s:%s" % (n_address, n_port),
-    username=n_username,
-    password=n_password
-)
+
 
 
 DB_FILE = config["data"]["db_file"]
