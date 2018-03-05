@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template,send_file
 import pickle
 import configparser
 import os
-from db_session import session, Article
 
 app = Flask(__name__)
 
@@ -26,11 +25,11 @@ def myload():
 
 
 def get_details(id):
-    res = session.query(Article).filter(Article.id == id).all()
-    if (len(res) == 0):
+    from db_connection import query_detail_by_id
+    one = query_detail_by_id(id)
+    if (not one):
         return ""
     else:
-        one = res[0]
         return {'title': one.title, "abstract": one.abstract, 'venue': one.venue, 'author': one.author}
 
 
