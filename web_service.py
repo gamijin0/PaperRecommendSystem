@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template,send_file
+from flask import Flask, request, jsonify, render_template, send_file
 import pickle
 import configparser
 import os
@@ -8,8 +8,10 @@ app = Flask(__name__)
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), "config.cfg"))
 REVERSED_INDEX_FILE = config["data"]["reversed_index_file"]
-WORDCLOUD_DIR  = config["data"]['wordcloud_dir']
+WORDCLOUD_DIR = config["data"]['wordcloud_dir']
 reversedIndex = dict()
+
+USE_ReverseIndex = False
 
 
 def myload():
@@ -30,17 +32,31 @@ def get_details(id):
     if (not one):
         return ""
     else:
-        return {'title': one.title, "abstract": one.abstract, 'venue': one.venue, 'author': one.author}
+        return {'title': one.title, "abstract": one.abstract, 'venue': str(list(one.published_in)), 'author': str(list(one.authors))}
 
 
 def query_ids_by_words_from_reverse_index(word_list):
-    res = []
+    res = set()
     for word in word_list:
         if (word in reversedIndex):
             if (len(res) == 0):
-                res = reversedIndex[word]
+                res = set(reversedIndex[word])
             else:
-                res = res & reversedIndex[word]
+                res = res & set(reversedIndex[word])
+    return res
+
+
+
+
+
+def query_ids_by_words_from_databases(word_list):
+    from db_connection import query_id_by_word
+    res = set()
+    for word in word_list:
+        if (len(res) == 0):
+            res = set(query_id_by_word(word))
+        else:
+            res = res & set(query_id_by_word(word))
     return res
 
 
@@ -49,29 +65,53 @@ def get_word_list_from_request(request):
     return word_list
 
 
-def get_content_from_title_by_ids(ids):
-    return [ get_details(id)['title'] for id in ids ]
+def get_content_by_year(year):
+
+    from db_connection import query_article_id_by_year
+    ids = query_article_id_by_year(year,500)
+
+    content = ""
+    for id in ids:
+        en = get_details(id)
+        content+=" "+en['title']
+        content+=" "+en["abstract"]
+    return content
+
 
 @app.route('/wordcloud', methods=["POST"])
 def word_cloud_sample():
+
+    STOPWORDS = ["based","system","model",]
+
     from wordcloud import WordCloud
     import time
     import os
     if (not os.path.isdir(WORDCLOUD_DIR)):
         os.mkdir(WORDCLOUD_DIR)
-    word_list = get_word_list_from_request(request=request)
-    ids = query_ids_by_words_from_reverse_index(word_list=word_list)
-    content = get_content_from_title_by_ids(ids=ids)
-    wordcloud = WordCloud(background_color="white", width=1000, height=860, margin=2).generate(" ".join(content))
-    wc_name = str(time.time())[:10]+".png"
-    wordcloud.to_file(os.path.join(WORDCLOUD_DIR,wc_name))
-    return send_file(os.path.join(WORDCLOUD_DIR,wc_name), mimetype='image/gif')
+    year = int(request.form['year'])
+    content = get_content_by_year(year=year)
+    wordcloud = WordCloud(background_color="white", width=1000, height=860, margin=2).generate(content)
+    wc_name = str(time.time())[:10] + ".png"
+    wordcloud.to_file(os.path.join(WORDCLOUD_DIR, wc_name))
+    return send_file(os.path.join(WORDCLOUD_DIR, wc_name), mimetype='image/gif')
+
+
+def get_article_id_by_words(word_list):
+    if (USE_ReverseIndex):
+        ids = query_ids_by_words_from_reverse_index(word_list=word_list)
+    else:
+        ids = query_ids_by_words_from_databases(word_list=word_list)
+    return ids
+
+
+
+
 
 @app.route('/query', methods=["GET", "POST"])
 def query_word_list():
     if (request.method == 'POST'):
         word_list = get_word_list_from_request(request=request)
-        ids = query_ids_by_words_from_reverse_index(word_list=word_list)
+        ids = get_article_id_by_words(word_list=word_list)
         return jsonify(
             {"result": [
                 {'id': id, "details": get_details(id)} for id in ids
@@ -79,6 +119,7 @@ def query_word_list():
         )
     else:
         return render_template("manual_query.html")
+
 
 @app.route('/authors', methods=["POST"])
 def query_authors_by_words():
@@ -92,5 +133,10 @@ def query_authors_by_words():
 
 
 if __name__ == '__main__':
-    myload()
+    import sys
+
+    if (len(sys.argv) == 2 and sys.argv[1] == "r"):
+        USE_ReverseIndex = True
+        myload()
+    print("Ready.")
     app.run(host="0.0.0.0", port=8080)

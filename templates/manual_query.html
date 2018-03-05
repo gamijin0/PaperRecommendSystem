@@ -1,13 +1,43 @@
 <html>
-    <head>
-        <title>Paper Query</title>
-	    </head>
-	        <body>
-		    <h1>这是一个用于开发的手动测试页面,请输入要查询的关键词,空格分开</h1>
-		            <form method="POST">
-			            <input  type="text" name="word_list_str">
-				              	<input type="submit"  value="查询" onclick="javascript:this.form.action='query';">
-  								<input type="submit" value="根据关键词生成词云" onclick="javascript:this.form.action='wordcloud';">
-					            </form>
-						        </body>
-							</html>
+<head>
+    <title>Paper Query</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- 可选的Bootstrap主题文件（一般不使用） -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"></script>
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<h1>这是一个用于开发的手动测试页面</h1>
+
+<div class="container">
+
+    <form method="POST" role="form">
+        <div class="form-group">
+            <label>根据关键词来查询论文,请输入要查询的关键词,空格分开</label>
+        </div>
+        <input type="text" name="word_list_str">
+        <button type="submit"  onclick="javascript:this.form.action='query';">查询</button>
+
+    </form>
+
+
+    <form method="POST" role="form">
+        <div class="form-group">
+            <label>请输入一个年份来生成对应的当年热点词云</label>
+            <input type="number" name="year">
+        </div>
+        <button type="submit"  onclick="javascript:this.form.action='wordcloud';">生成词云</button>
+
+    </form>
+
+</div>
+</body>
+</html>
+
