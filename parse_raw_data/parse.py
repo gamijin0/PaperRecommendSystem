@@ -1,3 +1,10 @@
+import threading
+import queue
+
+
+BLOCK_QUEUE = queue.Queue(5)
+
+
 #定义article的节点类
 class Article():
     id = 0
@@ -15,6 +22,16 @@ class Article():
         self.year = ""
         self.venue = ""
         self.abstract = ""
+
+
+def worker(add_entity_func):
+    while True:
+        entity = BLOCK_QUEUE.get(block=True)
+        add_entity_func(entity)
+        BLOCK_QUEUE.task_done()
+
+def save_check_point(line_num):
+    with open('last_line.txt', 'w') as outfile: outfile.write(str(line_num))
 
 #将一个论文内的所有属性放入一个block内，进行匹配提取
 def process_block_add_entity(block_content):
@@ -50,9 +67,7 @@ def process_block_add_entity(block_content):
             a.citation.add(int(line[2:]))
     return a
 
-
-def do_the_parse(DBLP_DATA_FILE,add_entity_func):
-
+def generate_entity_from_file(DBLP_DATA_FILE):
     start_from = 0
     try:
         with open('last_line.txt', 'r') as llf:
@@ -67,12 +82,21 @@ def do_the_parse(DBLP_DATA_FILE,add_entity_func):
         for i, line in enumerate(file):
             if i < start_from+1: continue
             if(len(line.strip())==0):
-                # print("spcae [%d]" % (i))
-                # time.sleep(0.1)
-                with open('last_line.txt', 'w') as outfile: outfile.write(str(i))
                 entity = process_block_add_entity(block_content)
-                add_entity_func(entity)
                 block_content.clear()
+                yield entity
+                save_check_point(i)
             else:
                 block_content.append(line)
 
+def do_the_parse(DBLP_DATA_FILE,add_entity_func,thread_num=2):
+
+    for i in range(thread_num):
+             t = threading.Thread(target=worker,args=(add_entity_func,))
+             t.start()
+    print("Started %d workers." % thread_num)
+
+    for entity in generate_entity_from_file(DBLP_DATA_FILE):
+        BLOCK_QUEUE.put(entity,block=True)
+
+    BLOCK_QUEUE.join()

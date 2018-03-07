@@ -81,16 +81,15 @@ def get_content_by_year(year):
 @app.route('/wordcloud', methods=["POST"])
 def word_cloud_sample():
 
-    STOPWORDS = ["based","system","model",]
-
-    from wordcloud import WordCloud
+    from wordcloud import WordCloud,STOPWORDS
+    mySTOPWORDS = ["paper","process","application","project","present","practice","results","models","work","component","used","however","use","new","also","time","user","based","system","model","using","data","problem","approach","technique","result","method","information"]+list(STOPWORDS)
     import time
     import os
     if (not os.path.isdir(WORDCLOUD_DIR)):
         os.mkdir(WORDCLOUD_DIR)
     year = int(request.form['year'])
     content = get_content_by_year(year=year)
-    wordcloud = WordCloud(background_color="white", width=1000, height=860, margin=2).generate(content)
+    wordcloud = WordCloud(background_color="white", width=1000, height=860, stopwords=mySTOPWORDS, margin=2).generate(content.lower())
     wc_name = str(time.time())[:10] + ".png"
     wordcloud.to_file(os.path.join(WORDCLOUD_DIR, wc_name))
     return send_file(os.path.join(WORDCLOUD_DIR, wc_name), mimetype='image/gif')
