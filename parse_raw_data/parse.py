@@ -82,7 +82,7 @@ def generate_entity_from_file(DBLP_DATA_FILE):
     start_from = 0
     with open('last_line.txt', 'r') as llf:
         start_from = int(llf.read())
-        print("Re-start from [%d] " % start_from)
+        print("Restart from [%d] " % start_from)
 
     block_content = []
 
