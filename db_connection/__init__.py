@@ -16,6 +16,7 @@ def add_entity_to_neo(en):
     new_article.article_id = en.id
     new_article.abstract = en.abstract
     new_article.year = en.year
+    new_article.line_num = en.line_num
 
     dblp_graph.push(new_article)
 
@@ -37,7 +38,7 @@ def add_entity_to_neo(en):
     dblp_graph.push(new_article)
 
 
-    print("[%s] has %d authors,cite %d other articles " % (str(en.id), len(authors), len(en.citation)))
+    print("[%s] has %d authors,cite %d other articles, locate at %d line" % (str(en.id), len(authors), len(en.citation),int(en.line_num)))
 
 
 

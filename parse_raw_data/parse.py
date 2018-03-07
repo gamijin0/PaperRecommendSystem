@@ -14,6 +14,7 @@ class Article():
     year = ""
     venue = ""
     abstract= ""
+    line_num = ""
     citation=set()
     def __init__(self):
         self.id=0
@@ -23,7 +24,7 @@ class Article():
         self.year = ""
         self.venue = ""
         self.abstract = ""
-
+        self.line_num = 0
 
 def worker(add_entity_func):
     while True:
@@ -43,7 +44,7 @@ def save_check_point(line_num):
     with open('last_line.txt', 'w') as outfile: outfile.write(str(line_num))
 
 #将一个论文内的所有属性放入一个block内，进行匹配提取
-def process_block_add_entity(block_content):
+def process_block_add_entity(block_content,line_num):
     """
     example:
         #*Applying the genetic encoded conceptual graph to grouping learning.
@@ -74,6 +75,7 @@ def process_block_add_entity(block_content):
             a.abstract=line[2:]
         if(line[1]=="%"):
             a.citation.add(int(line[2:]))
+    a.line_num = line_num
     return a
 
 def generate_entity_from_file(DBLP_DATA_FILE):
@@ -88,7 +90,7 @@ def generate_entity_from_file(DBLP_DATA_FILE):
         for i, line in enumerate(file):
             if i < start_from+1: continue
             if(len(line.strip())==0):
-                entity = process_block_add_entity(block_content)
+                entity = process_block_add_entity(block_content,i)
                 block_content.clear()
                 yield entity
                 save_check_point(i)
