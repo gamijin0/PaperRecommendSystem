@@ -2,9 +2,9 @@ import threading
 import queue
 import signal
 
-
 BLOCK_QUEUE = queue.Queue(8)
 STOP_WORK_FLAG = False
+
 
 #定义article的节点类
 class Article():
@@ -13,11 +13,12 @@ class Article():
     author = ""
     year = ""
     venue = ""
-    abstract= ""
+    abstract = ""
     line_num = ""
-    citation=set()
+    citation = set()
+
     def __init__(self):
-        self.id=0
+        self.id = 0
         self.citation = set()
         self.title = ""
         self.author = ""
@@ -26,25 +27,30 @@ class Article():
         self.abstract = ""
         self.line_num = 0
 
+
 def worker(add_entity_func):
     while True:
-        if(STOP_WORK_FLAG is True and BLOCK_QUEUE.empty()):
+        if (STOP_WORK_FLAG is True and BLOCK_QUEUE.empty()):
             break
         entity = BLOCK_QUEUE.get(block=True)
         add_entity_func(entity)
         BLOCK_QUEUE.task_done()
 
-def feeder(DBLP_DATA_FILE):
-    for entity in generate_entity_from_file(DBLP_DATA_FILE):
-        if(STOP_WORK_FLAG):
+
+def feeder(DBLP_DATA_FILE, START_LINE):
+    for entity in generate_entity_from_file(DBLP_DATA_FILE, START_LINE):
+        if (STOP_WORK_FLAG):
             break
-        BLOCK_QUEUE.put(entity,block=True)
+        BLOCK_QUEUE.put(entity, block=True)
+
 
 def save_check_point(line_num):
-    with open('last_line.txt', 'w') as outfile: outfile.write(str(line_num))
+    with open('last_line.txt', 'w') as outfile:
+        outfile.write(str(line_num))
+
 
 #将一个论文内的所有属性放入一个block内，进行匹配提取
-def process_block_add_entity(block_content,line_num):
+def process_block_add_entity(block_content, line_num):
     """
     example:
         #*Applying the genetic encoded conceptual graph to grouping learning.
@@ -71,31 +77,34 @@ def process_block_add_entity(block_content,line_num):
             a.id = int(line[6:])
         if (line[1] == "c"):
             a.venue = line[2:]
-        if(line[1]=='!'):
-            a.abstract=line[2:]
-        if(line[1]=="%"):
+        if (line[1] == '!'):
+            a.abstract = line[2:]
+        if (line[1] == "%"):
             a.citation.add(int(line[2:]))
     a.line_num = line_num
     return a
 
-def generate_entity_from_file(DBLP_DATA_FILE):
-    start_from = 0
-    with open('last_line.txt', 'r') as llf:
-        start_from = int(llf.read())
-        print("Restart from [%d] " % start_from)
+
+def generate_entity_from_file(DBLP_DATA_FILE, START_LINE):
+    if (START_LINE == 0):
+        with open('last_line.txt', 'r') as llf:
+            START_LINE = int(llf.read())
+            print("Restart from [%d] " % START_LINE)
 
     block_content = []
 
-    with open(DBLP_DATA_FILE, 'r',encoding="utf-8") as file:
+    with open(DBLP_DATA_FILE, 'r', encoding="utf-8") as file:
         for i, line in enumerate(file):
-            if i < start_from+1: continue
-            if(len(line.strip())==0):
-                entity = process_block_add_entity(block_content,i)
+            if i < START_LINE + 1:
+                continue
+            if (len(line.strip()) == 0):
+                entity = process_block_add_entity(block_content, i)
                 block_content.clear()
                 yield entity
                 save_check_point(i)
             else:
                 block_content.append(line)
+
 
 def stop_work(signum=None, frame=None):
     global STOP_WORK_FLAG
@@ -103,27 +112,29 @@ def stop_work(signum=None, frame=None):
     print("\n[Stopping now ...]\n")
 
 
-signal.signal(signal.SIGINT,stop_work)
-signal.signal(signal.SIGTERM,stop_work)
+signal.signal(signal.SIGINT, stop_work)
+signal.signal(signal.SIGTERM, stop_work)
 
 
-def do_the_parse(DBLP_DATA_FILE,add_entity_func,thread_num=2):
-
+def do_the_parse(DBLP_DATA_FILE, add_entity_func, thread_num=2, start_line=0):
     worker_list = []
+    START_LINE = start_line
+    for i in range(int(thread_num)):
+        t = threading.Thread(target=worker, args=(add_entity_func, ))
+        worker_list.append(t)
+        t.start()
 
-    for i in range(thread_num):
-             t = threading.Thread(target=worker,args=(add_entity_func,))
-             worker_list.append(t)
-             t.start()
-
-    feeder_thread = threading.Thread(target=feeder,args=(DBLP_DATA_FILE,))
+    feeder_thread = threading.Thread(
+        target=feeder, args=(DBLP_DATA_FILE, START_LINE))
     feeder_thread.start()
 
     print("Started %d workers and 1 feeder." % thread_num)
 
     while True:
-        sig = input("\n================================================\n [  When you want to stop, please input 'stop'] \n================================================\n\n")
-        if(sig=="stop"):
+        sig = input(
+            "\n================================================\n [  When you want to stop, please input 'stop'] \n================================================\n\n"
+        )
+        if (sig == "stop"):
             stop_work()
             break
     BLOCK_QUEUE.join()

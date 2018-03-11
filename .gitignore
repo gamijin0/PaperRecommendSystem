@@ -5,3 +5,4 @@ config.cfg
 *.png
 *.pdf
 __pycache__
+.ropeproject

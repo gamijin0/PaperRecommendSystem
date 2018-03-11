@@ -2,14 +2,14 @@
 import logging
 import re
 import pickle
-import sys
-sys.path.append("..")
-from db_session import Article as db_Article,session
 import os
 import configparser
+import sys
+sys.path.append("..")
+
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__),"../config.cfg"))
+config.read(os.path.join(os.path.dirname(__file__), "../config.cfg"))
 
 Exception_log = config["log"]["exception_log"]
 
@@ -19,24 +19,26 @@ REVERSED_INDEX_FILE = config["data"]["reversed_index_file"]
 LAST_LINE_FILE = config['data']["last_line_file"]
 DBLP_DATA_FILE = config['data']['dblp_data_file']
 
-
 reversedIndex = dict()
+
 
 def getWord(mystring):
     pat = '[a-zA-Z]+'
-    res = re.findall(pat,mystring)
+    res = re.findall(pat, mystring)
     for word in res:
-        if(len(word)>=2):
+        if (len(word) >= 2):
             yield word.lower()
 
-def addToHash(mystring,id):
+
+def addToHash(mystring, id):
     for word in getWord(mystring):
-        if(word in reversedIndex):
+        if (word in reversedIndex):
             reversedIndex[word].add(id)
         else:
-            new_set = set() #use set to avoid the repeat id
+            new_set = set()  #use set to avoid the repeat id
             new_set.add(id)
             reversedIndex[word] = new_set
+
 
 class Article:
     id = ""
@@ -47,8 +49,8 @@ class Article:
     abstract = ""
 
     def addToReversedIndex(self):
-        for property in [self.title,self.author,self.journal,self.abstract]:
-            addToHash(property,self.id)
+        for property in [self.title, self.author, self.journal, self.abstract]:
+            addToHash(property, self.id)
 
 
 def process_block_add_entity(block_content):
@@ -78,7 +80,7 @@ def process_block_add_entity(block_content):
             a.id = line[6:]
         if (line[1] == "c"):
             a.journal = line[2:]
-        if(line[1]=="!"):
+        if (line[1] == "!"):
             a.abstract = line[2:]
 
     # if(len(a.abstract)>0):
@@ -86,20 +88,21 @@ def process_block_add_entity(block_content):
     #     session.commit()
     a.addToReversedIndex()
 
-    print("[ %s ] added."%(a.id))
+    print("[ %s ] added." % (a.id))
 
 
 def mydump():
 
-    with open(REVERSED_INDEX_FILE,'wb') as f:
-        pickle.dump(obj=reversedIndex,file=f,protocol=2)
+    with open(REVERSED_INDEX_FILE, 'wb') as f:
+        pickle.dump(obj=reversedIndex, file=f, protocol=2)
         print("Dump hash table to [%s]" % REVERSED_INDEX_FILE)
+
 
 def myload():
     import os
     global reversedIndex
-    if(os.path.exists(REVERSED_INDEX_FILE)):
-        with open(REVERSED_INDEX_FILE,'rb') as f:
+    if (os.path.exists(REVERSED_INDEX_FILE)):
+        with open(REVERSED_INDEX_FILE, 'rb') as f:
             reversedIndex = pickle.load(f)
             print("Load from [%s]" % REVERSED_INDEX_FILE)
     else:
@@ -107,7 +110,7 @@ def myload():
         print("Generate a new HashTable.")
 
 
-if(__name__=="__main__"):
+if (__name__ == "__main__"):
 
     myload()
 
@@ -120,10 +123,10 @@ if(__name__=="__main__"):
 
     block_content = []
 
-    with open(DBLP_DATA_FILE, 'r',encoding="utf-8") as file:
+    with open(DBLP_DATA_FILE, 'r', encoding="utf-8") as file:
         for i, line in enumerate(file):
-            if i < start_from+1: continue
-            if(len(line.strip())==0):
+            if i < start_from + 1: continue
+            if (len(line.strip()) == 0):
                 process_block_add_entity(block_content)
                 block_content.clear()
                 # if (i % 10000 == 0):
